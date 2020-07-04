@@ -1,0 +1,26 @@
+{
+  "name": "byphper/stress",
+  "description": "Multi-process stress testing tool based on swoole",
+  "require": {
+    "php": ">=7.1",
+    "ext-swoole": "^4.5",
+    "swoole/ide-helper": "^4.5",
+    "symfony/console": "^5.1"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "actor",
+      "email": "by_phper@163.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {
+      "Actor\\Stress\\": "src/"
+    }
+  },
+  "bin": [
+    "php index.php"
+  ]
+}
