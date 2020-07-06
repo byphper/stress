@@ -4,6 +4,8 @@
 namespace Actor\Stress;
 
 
+use Swoole\Coroutine;
+
 class Process
 {
 
@@ -15,19 +17,38 @@ class Process
 
     private $options;
 
-    private $task;
+    private $concurrency;
+
+    private $id;
 
     public function __construct(array $options, array $task, int $id)
     {
         $this->options = $options;
-        $this->task = $task;
-
-        $this->process = new \Swoole\Process([$this, 'run']);
+        $this->concurrency = $task[$id];
+        $this->id = $id;
+        $this->process = new \Swoole\Process([$this, 'run'], false, 2, true);
     }
 
-    public function run()
+    public function run(\Swoole\Process $proc)
     {
-
+        $socket = $proc->exportSocket();
+        $requests = $this->options['request'];
+        $channelSize = $this->concurrency * $requests;
+        $modelChannel = new Coroutine\Channel($channelSize);
+        for ($i = 0; $i < $this->concurrency; $i++) {
+            Coroutine::create(function () use ($requests, $socket, $modelChannel) {
+                $client = new HttpClient($this->options);
+                for ($j = 0; $j < $requests; $j++) {
+                    $requestModel = $client->request();
+                    $modelChannel->push($requestModel);
+                }
+            });
+        }
+        for ($i = 0; $i < $channelSize; $i++) {
+            $requestModel = $modelChannel->pop();
+            $socket->send(json_encode($requestModel));
+        }
+        $socket->send("over");
     }
 
     /**

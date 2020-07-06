@@ -5,7 +5,9 @@
     "php": ">=7.1",
     "ext-swoole": "^4.5",
     "swoole/ide-helper": "^4.5",
-    "symfony/console": "^5.1"
+    "symfony/console": "^5.1",
+    "ext-bcmath": "*",
+    "ext-json": "*",
   },
   "license": "MIT",
   "authors": [

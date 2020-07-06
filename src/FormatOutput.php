@@ -4,11 +4,14 @@
 namespace Actor\Stress;
 
 
+use Symfony\Component\Console\Helper\FormatterHelper;
+
 class FormatOutput
 {
 
-    public static function error(string $error): string
+    public static function section(string $title, string $content): string
     {
-        return "<error>" . $error . "</error>";
+        $helper = new FormatterHelper();
+        return $helper->formatSection($title, $content);
     }
 }
