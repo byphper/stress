@@ -43,7 +43,7 @@ class Stress
         }
         $tasks = $this->allocateTask($concurrency, $works);
         $output->writeln("");
-        $output->writeln("本次派出" . $works . "个进程,共" . $concurrency . "个协程对接口进行疯狂轰炸!!!");
+        $output->writeln("本次压测派出" . $works . "个进程,共" . $concurrency . "个协程对接口进行请求!!!");
         $this->outputRequestInfo($output);
         //创建子进程
         for ($i = 0; $i < $works; $i++) {

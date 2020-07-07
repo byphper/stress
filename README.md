@@ -3,7 +3,9 @@
 go原生的协程可以很方便的实现并发请求，Swoole4+以后对协程做了大量的工作，包括提供了各种协程客户端，所以试着用swoole来实现一个类似的压测工具。得力于swoole对底层进程，协程，以及它们之间通信的高度封装，我们实现这个小工具只需要很少的代码。
 
 ### 安装
+```
 composer require byphper/stress
+```
 
 ### 使用
 
@@ -11,7 +13,7 @@ composer require byphper/stress
 
 ```
 
-composer stress http -c 10 -r 100 -u http://www.xxx.com/
+vendor/bin/stress http -c 10 -r 100 -u http://www.xxx.com/
 
 ```
 #### 参数说明
