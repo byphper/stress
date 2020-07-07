@@ -9,7 +9,7 @@ composer require byphper/stress
 
 目前只支持HTTP压测
 
-```shell
+```
 
 composer stress http -c 10 -r 100 -u http://www.xxx.com/
 
@@ -22,7 +22,7 @@ composer stress http -c 10 -r 100 -u http://www.xxx.com/
 - -k  keep-alive 是否开启http keep-alive 默认false不开启
 - -H  http-header 设置请求头  以json字符串格式 eg：-H '{"access_token":"xxxxxx"}'
 - -C  http-cookie 设置cookie  以json字符串格式 eg：-C '{"seesion_id":"xxxxxx"}'
-- -B  http-body 设置请求body  以json字符串格式 eg：-C '{"name":"xxxxxx"}'
+- -B  http-body 设置请求body  以json字符串格式 eg：-B '{"name":"xxxxxx"}'
 
 ####输出示例
 ```
