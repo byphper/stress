@@ -20,9 +20,15 @@ class HttpClient
         $this->init($options);
     }
 
+    /**
+     * 初始化http client
+     * @param array $options
+     */
     private function init(array $options)
     {
-        $client = new Client($options['url']['host'], $options['url']['port'], $options['ssl']);
+        $isHttps = $options['url']['scheme'] == 'https';
+        $port = $isHttps ? 443 : $options['url']['port'];
+        $client = new Client($options['url']['host'], $port, $isHttps);
         $client->set(['keep_alive' => $options['alive']]);
         $client->setMethod($options['method']);
         $client->setHeaders($options['header']);
@@ -34,11 +40,16 @@ class HttpClient
         $this->options = $options;
     }
 
+    /**
+     * 发起http请求
+     * @return RequestModel
+     */
     public function request(): RequestModel
     {
         $model = new RequestModel();
         $model->startTime = microtime(true);
-        $status = $this->client->execute($this->options['url']['path']);
+        $path = empty($this->options['url']['path']) ? '/' : $this->options['url']['path'];
+        $status = $this->client->execute($path);
         $model->endTime = microtime(true);
         if (!$status) {
             $model->success = false;

@@ -28,6 +28,7 @@ class Stress
     }
 
     /**
+     * 开始进行压测
      * @param OutputInterface $output
      * @throws \Exception
      */
@@ -43,21 +44,17 @@ class Stress
         $tasks = $this->allocateTask($concurrency, $works);
         $output->writeln("");
         $output->writeln("本次派出" . $works . "个进程,共" . $concurrency . "个协程对接口进行疯狂轰炸!!!");
-        $output->writeln("");
-        $output->writeln("请求地址：" . $this->options['full_url']);
-        $output->writeln("");
-        $output->writeln("并发数：" . $this->options['concurrency']);
-        $output->writeln("");
-        $output->writeln("请求数：" . $this->options['request']);
-        $output->writeln("");
-
+        $this->outputRequestInfo($output);
+        //创建子进程
         for ($i = 0; $i < $works; $i++) {
             $process = new Process($this->options, $tasks, $i);
             $process->start();
         }
+        //创建协程容器
         run(function () use ($output) {
             $resultChannel = new Coroutine\Channel($this->options['concurrency'] * $this->options['request']);
             foreach (Process::$processMap as $processId => $process) {
+                //和子进程之间通过unix_socket通信
                 Coroutine::create(function () use ($process, $resultChannel) {
                     $socket = $process->exportSocket();
                     while (true) {
@@ -74,17 +71,22 @@ class Stress
             $table->setColumnWidths([0 => 5, 1 => 5, 2 => 5, 3 => 5, 4 => 5, 5 => 5]);
             $table->addRow(['耗时', '并发数', '成功数', '失败数', 'QPS', '平均耗时']);
             $table->render();
+            //定时器 每隔1s打印压测结果
             Timer::tick(1000, function ($timerId) use ($table, $resultChannel) {
                 if ($resultChannel->isFull()) {
                     Timer::clear($timerId);
                 }
                 if (!empty($this->results)) {
-                    $table->setRows([$this->calculate()]);
-                    $table->render();
+                    $calculateRow = $this->calculate();
+                    if (!empty($calculateRow)) {
+                        $table->setRows([$calculateRow]);
+                        $table->render();
+                    }
                 }
 
             });
         });
+        //主进程等待子进程完成
         \Swoole\Process::wait(true);
         $output->writeln("");
         $final = $this->calculate();
@@ -92,8 +94,34 @@ class Stress
         $output->writeln("");
     }
 
+    /**
+     * 打印请求相关信息
+     * @param OutputInterface $output
+     */
+    private function outputRequestInfo(OutputInterface $output)
+    {
+        $output->writeln("");
+        $output->writeln("请求地址：" . $this->options['full_url']);
+        $output->writeln("");
+        $output->writeln("并发数：" . $this->options['concurrency']);
+        $output->writeln("");
+        $output->writeln("请求数：" . $this->options['request']);
+        $output->writeln("");
+        $output->writeln("请求cookie：" . json_encode($this->options['cookie']));
+        $output->writeln("");
+        $output->writeln("请求body：" . json_encode($this->options['body']));
+        $output->writeln("");
+    }
+
+    /**
+     * 根据请求返回结果 计算相关指标
+     * @return array
+     */
     private function calculate(): array
     {
+        if (empty($this->results)) {
+            return [];
+        }
         static $count = 0;
         static $flag = 0;
         static $totalTime = 0;
@@ -108,7 +136,7 @@ class Stress
                 $fails++;
             }
         }
-        $qps = bcdiv(count($this->results), $totalTime, 2);
+        $qps = $totalTime > 0 ? bcdiv(count($this->results), $totalTime, 2) : 0;
         $avgTime = bcdiv($totalTime, count($this->results), 4);
         return [$count++, $this->options['concurrency'], $success, $fails, $qps . '/秒', $avgTime . '秒'];
     }
