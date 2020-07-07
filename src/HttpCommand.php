@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class HttpCommand extends Command
 {
-    protected static $defaultName = 'http:stress';
+    protected static $defaultName = 'http';
 
     /**
      * 配置命令行参数
@@ -82,8 +82,7 @@ Http body');
             throw new InvalidOptionException('请填写完整的URL地址，包括http或https');
         }
         !isset($options['url']['port']) && $options['url']['port'] = 80;
-        !isset($options['ssl']) && $options['ssl'] = false;
-        !isset($options['alive']) && $options['alive'] = false;
+        !isset($options['keep-alive']) && $options['keep-alive'] = false;
         !isset($options['method']) && $options['method'] = 'GET';
         $options['body'] = isset($options['body']) ? json_decode($options['body'], true) : [];
         $options['cookie'] = isset($options['cookie']) ? json_decode($options['cookie'], true) : [];

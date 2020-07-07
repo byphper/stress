@@ -29,7 +29,7 @@ class HttpClient
         $isHttps = $options['url']['scheme'] == 'https';
         $port = $isHttps ? 443 : $options['url']['port'];
         $client = new Client($options['url']['host'], $port, $isHttps);
-        $client->set(['keep_alive' => $options['alive']]);
+        $client->set(['keep_alive' => $options['keep-alive']]);
         $client->setMethod($options['method']);
         $client->setHeaders($options['header']);
         $client->setCookies($options['cookie']);
